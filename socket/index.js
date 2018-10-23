@@ -12,9 +12,7 @@ var socket = (server) =>{
 
 
     var findPeerForLoneSocket = function(socket) {
-        // this is place for possibly some extensive logic
-        // which can involve preventing two people pairing multiple times
-       // console.log(queue);
+
         if (queue.length!=0) {
             // somebody is in queue, pair them!
             var peer = queue.pop();
@@ -30,7 +28,6 @@ var socket = (server) =>{
             socket.emit('startGame');
 
         } else {
-            // queue is empty, add our lone socket
             queue.push(socket);
         }
     }
@@ -53,7 +50,6 @@ var socket = (server) =>{
         rand = makeRandCoord();
         io.emit('nextPoison', rand.x, rand.y);
 
-        /*  socket.broadcast.emit('join', username);*/
 
         socket.on('move', function (snake){
 
