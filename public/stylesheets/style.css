@@ -1,0 +1,15 @@
+body {
+  padding: 50px;
+  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+a {
+  color: #00B7FF;
+}
+
+/*
+#example {
+  margin: 0 auto; !* Отступ слева и справа *!
+  !*background: #fc0; !* Цвет фона *!*!
+  padding: 10px; !* Поля вокруг текста *!
+}*/

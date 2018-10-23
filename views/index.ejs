@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Web Snake</title>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+  </head>
+  <body>
+  <div align="center">
+  <canvas id='example'  tabindex="0"></canvas>
+    <div id="div0">
+    </div>
+  </div>
+
+
+  <script src="/socket.io/socket.io.js"></script>
+
+  <script src="/javascripts/game.js"></script>
+
+  <script>
+
+
+      var socket = io().connect('',{
+          'reconnection delay': 500
+      });
+
+      socket
+          .on('startGame', function () {
+              gameOn=setInterval(game, 120);
+
+          })
+          .on('nextMove', function(coords) {
+              enemySnake = coords;
+
+          })
+          .on('victory', function () {
+              clearInterval(gameOn);
+              ctx.font = 'bold 200px sans-serif';
+              ctx.strokeText("You Win", 100, example.height/2);
+          })
+          .on('nextFood', function (x, y) {
+              foodX = x;
+              foodY = y;
+          })
+          .on('nextPoison', function (x, y) {
+              poisonX = x;
+              poisonY = y;
+          })
+          .on('leave', function (room) {
+              clearInterval(gameOn);
+              ctx.font = 'bold 100px sans-serif';
+              ctx.strokeText("Your opponent left", 80, example.height/2+100);
+
+          })
+
+  </script>
+  </body>
+</html>
