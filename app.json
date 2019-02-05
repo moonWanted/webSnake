@@ -1,0 +1,22 @@
+{
+  "addons": [
+
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ],
+  "description": "webSnake is a two-player realisation of good old Snake game, that use Node.js server + Express + Socket.io",
+  "env": {
+  },
+  "formation": {
+    "web": {
+      "quantity": 1
+    }
+  },
+  "name": "webSnake",
+  "scripts": {
+  },
+  "stack": "heroku-18"
+}
