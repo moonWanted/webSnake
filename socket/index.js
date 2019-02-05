@@ -1,20 +1,19 @@
-var socket = (server) =>{
+var socket = (server) => {
 
     var io = require('socket.io')(server);
 
-
-    var FIELD_WIDTH=30;
-    var FIELD_HEIGHT=20;
+    var FIELD_WIDTH = 30;
+    var FIELD_HEIGHT = 20;
 
     var queue = [];    // list of sockets waiting for peers
     var rooms = {};    // map socket.id => room
     var allUsers = {};
 
 
-    var findPeerForLoneSocket = function(socket) {
+    var findPeerForLoneSocket = function (socket) {
 
-        if (queue.length!=0) {
-            // somebody is in queue, pair them!
+        if (queue.length != 0) {
+            // somebody is in queue
             var peer = queue.pop();
             var room = socket.id + '#' + peer.id;
             // join them both
@@ -32,14 +31,14 @@ var socket = (server) =>{
         }
     }
 
-    var makeRandCoord = function() {
+    var makeRandCoord = function () {
         return {
             x: Math.floor(Math.random() * ((FIELD_WIDTH - 1) - 0)),
             y: Math.floor(Math.random() * ((FIELD_HEIGHT - 1) - 0))
         };
     }
 
-    io.on('connection', function(socket){
+    io.on('connection', function (socket) {
 
         allUsers[socket.id] = socket;
         findPeerForLoneSocket(socket);
@@ -51,10 +50,10 @@ var socket = (server) =>{
         io.emit('nextPoison', rand.x, rand.y);
 
 
-        socket.on('move', function (snake){
+        socket.on('move', function (snake) {
 
             var room = rooms[socket.id];
-            socket.broadcast.to(room).emit('nextMove',snake);
+            socket.broadcast.to(room).emit('nextMove', snake);
 
         });
 
@@ -74,7 +73,7 @@ var socket = (server) =>{
         socket.on('disconnect', function () {
             var room = rooms[socket.id];
             socket.broadcast.to(room).emit('leave', room);
-            if(queue.indexOf(socket)==0) queue.splice(queue.indexOf(socket),1);
+            if (queue.indexOf(socket) == 0) queue.splice(queue.indexOf(socket), 1);
         });
     });
 

@@ -7,9 +7,8 @@ a {
   color: #00B7FF;
 }
 
-/*
-#example {
-  margin: 0 auto; !* Отступ слева и справа *!
-  !*background: #fc0; !* Цвет фона *!*!
-  padding: 10px; !* Поля вокруг текста *!
-}*/
+#content {
+  text-align: center
+}
+
+
