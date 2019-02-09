@@ -1,6 +1,6 @@
-var socket = (server) => {
+const socket = (server) => {
 
-    var io = require('socket.io')(server);
+    const io = require('socket.io')(server);
 
     var FIELD_WIDTH = 30;
     var FIELD_HEIGHT = 20;
@@ -10,75 +10,74 @@ var socket = (server) => {
     var allUsers = {};
 
 
-    var findPeerForLoneSocket = function (socket) {
+    function findPeerForLoneSocket(socket) {
 
         if (queue.length != 0) {
             // somebody is in queue
-            var peer = queue.pop();
-            var room = socket.id + '#' + peer.id;
+            let peer = queue.pop();
+            let room = socket.id + '#' + peer.id;
             // join them both
             peer.join(room);
             socket.join(room);
             // register rooms to their names
             rooms[peer.id] = room;
             rooms[socket.id] = room;
-            //  start the game
-            peer.emit('startGame');
-            socket.emit('startGame');
+            // make initial snake position and start the game
+            let rand = makeRandCoord();
+            peer.emit('startGame', rand.x, rand.y);
+            socket.emit('startGame', rand.x+1, rand.y+2);
 
         } else {
             queue.push(socket);
         }
     }
 
-    var makeRandCoord = function () {
+    function makeRandCoord() {
         return {
-            x: Math.floor(Math.random() * ((FIELD_WIDTH - 1) - 0)),
-            y: Math.floor(Math.random() * ((FIELD_HEIGHT - 1) - 0))
+            x: Math.floor(1+Math.random() * (FIELD_WIDTH-1)),
+            y: Math.floor(1+Math.random() * (FIELD_HEIGHT-1))
         };
     }
 
     io.on('connection', function (socket) {
+        setTimeout(()=> {
+            allUsers[socket.id] = socket;
+            findPeerForLoneSocket(socket);
 
-        allUsers[socket.id] = socket;
-        findPeerForLoneSocket(socket);
+            let rand = makeRandCoord();
 
-        var rand = makeRandCoord();
-
-        io.emit('nextFood', rand.x, rand.y);
-        rand = makeRandCoord();
-        io.emit('nextPoison', rand.x, rand.y);
-
-
-        socket.on('move', function (snake) {
-
-            var room = rooms[socket.id];
-            socket.broadcast.to(room).emit('nextMove', snake);
-
-        });
-
-        socket.on('gameOver', function () {
-            var room = rooms[socket.id];
-            socket.broadcast.to(room).emit('victory');
-        });
-
-        socket.on('foodEaten', function () {
-            var room = rooms[socket.id];
-            var rand = makeRandCoord();
-            io.in(room).emit('nextFood', rand.x, rand.y);
+            io.emit('nextFood', rand.x, rand.y);
             rand = makeRandCoord();
-            io.in(room).emit('nextPoison', rand.x, rand.y);
+            io.emit('nextPoison', rand.x, rand.y);
+
+
+            socket.on('move', function (snake) {
+                let room = rooms[socket.id];
+                socket.broadcast.to(room).emit('nextMove', snake);
+            });
+
+            socket.on('gameOver', function () {
+                let room = rooms[socket.id];
+                socket.broadcast.to(room).emit('victory');
+            });
+
+            socket.on('foodEaten', function () {
+                let room = rooms[socket.id];
+                let rand = makeRandCoord();
+                io.in(room).emit('nextFood', rand.x, rand.y);
+                rand = makeRandCoord();
+                io.in(room).emit('nextPoison', rand.x, rand.y);
+            });
+
+            socket.on('disconnect', function () {
+                let room = rooms[socket.id];
+                socket.broadcast.to(room).emit('leave', room);
+                if (queue.indexOf(socket) == 0) queue.splice(queue.indexOf(socket), 1);
+            });
         });
 
-        socket.on('disconnect', function () {
-            var room = rooms[socket.id];
-            socket.broadcast.to(room).emit('leave', room);
-            if (queue.indexOf(socket) == 0) queue.splice(queue.indexOf(socket), 1);
-        });
-    });
-
-    return io;
-
+        return io;
+        },1000);
 };
 
 module.exports = socket;

@@ -14,7 +14,7 @@
   </div>
 
 
-  <script src="/javascripts/game.js"></script>
+ <script src="/javascripts/game.js"></script>
 
   <script src="/javascripts/socket.io.js"></script>
 
@@ -25,8 +25,10 @@
       });
 
       socket
-          .on('startGame', function () {
-              gameOn=setInterval(game, 120);
+          .on('startGame', function (snakeX, snakeY) {
+              snake = new Snake(snakeX, snakeY, START_SIZE, 39)
+              gameField.focus();
+              gameOn=setInterval(game, 130);
               let display = document.querySelector('#timer');
               startTimer(20, display);
           })
@@ -39,7 +41,6 @@
               victory = true;
               ctx.font = 'bold 200px sans-serif';
               ctx.strokeText("You Win", 210, gameField.height/2);
-              document.body.addEventListener( "click" , function() {location.reload()});
           })
           .on('nextFood', function (x, y) {
               foodX = x;
@@ -53,6 +54,7 @@
               clearInterval(gameOn);
               ctx.font = 'bold 100px sans-serif';
               ctx.strokeText("Your opponent left", 140, gameField.height/2+100);
+              leave = true;
           })
 
   </script>

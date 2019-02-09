@@ -12,23 +12,20 @@ var START_SIZE = 4;
 var score;
 var gameOver = false;
 var victory = false;
+var leave = false;
 var gameOn;
 var enemySnake;
 var foodX, foodY, poisonX, poisonY;
 
 
-var gameField = document.getElementById("gameField"),
+const gameField = document.getElementById("gameField"),
     ctx = gameField.getContext('2d');
 
 gameField.width = FIELD_WIDTH * POINT_RADIUS;
 gameField.height = FIELD_HEIGHT * POINT_RADIUS;
 
 ctx.font = 'bold 100px sans-serif';
-ctx.strokeText("Waiting for player 2", 80, gameField.height / 2);
-
-//initial snake position
-var snakeX = Math.round(1 - 0.5 + Math.random() * (10 - 1 + 1));
-var snakeY = Math.round(1 - 0.5 + Math.random() * (10 - 1 + 1));
+ctx.strokeText("Waiting for player 2", 130, gameField.height / 2);
 
 gameField.onkeydown = function (e) {
     snake.setDirection(e.keyCode)
@@ -55,7 +52,7 @@ function Snake(x, y, length, direction) {
     var directionSnake;
     var self = this;
 
-    for (var i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
         self.snake.push(new Point(x + i, y));
     }
     directionSnake = direction;
@@ -150,7 +147,6 @@ function Snake(x, y, length, direction) {
 }
 
 function Food() {
-
     var self = this;
 
     //initial food position
@@ -189,18 +185,11 @@ function Food() {
 }
 
 function Poison() {
-    this.x = -1;
-    this.y = -1;
     var self = this;
 
-    this.eat = function () {
-        self.x = -1;
-        self.y = -1;
-    }
-
-    this.isEaten = function () {
-        return self.getX() == -1;
-    }
+    //initial poison position
+    this.x = -1;
+    this.y = -1;
 
     this.draw = function () {
         ctx.fillStyle = 'red';
@@ -231,10 +220,6 @@ function drawEnemy(exsnake) {
     }
 }
 
-var snake = new Snake(snakeX, snakeY, START_SIZE, 39);
-var food = new Food();
-var poison = new Poison();
-
 function startTimer(duration, display) {
     var timer = duration, minutes, seconds;
     var timerInterval = setInterval(() => {
@@ -254,12 +239,20 @@ function startTimer(duration, display) {
             display.textContent = '';
             clearInterval(timerInterval);
         }
-        if (victory || gameOver) {
+        if (victory || gameOver || leave) {
             display.textContent = '';
             clearInterval(timerInterval);
+            document.body.addEventListener("click", function () {
+                location.reload()
+            });
         }
     }, 1000);
 }
+
+
+var snake = new Snake(-1, -1, 1, 39);
+var food = new Food();
+var poison = new Poison();
 
 //main game cycle
 var game = function () {
@@ -271,10 +264,5 @@ var game = function () {
         ctx.strokeText("Game Over", 30, gameField.height / 2);
         socket.emit('gameOver');
         clearInterval(gameOn)
-        document.body.addEventListener("click", function () {
-            location.reload()
-        });
     }
 }
-
-gameField.focus();
