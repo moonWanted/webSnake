@@ -8,6 +8,55 @@ var POINT_RADIUS = 40;
 var FIELD_WIDTH = 30;
 var FIELD_HEIGHT = 20;
 var START_SIZE = 4;
+//colors
+Colors = {};
+Colors.names = {
+    aqua: "#00ffff",
+    beige: "#f5f5dc",
+    black: "#000000",
+    blue: "#0000ff",
+    brown: "#a52a2a",
+    cyan: "#00ffff",
+    darkblue: "#00008b",
+    darkcyan: "#008b8b",
+    darkgrey: "#a9a9a9",
+    darkgreen: "#006400",
+    darkkhaki: "#bdb76b",
+    darkmagenta: "#8b008b",
+    darkolivegreen: "#556b2f",
+    darkorange: "#ff8c00",
+    darkorchid: "#9932cc",
+    darkred: "#8b0000",
+    darksalmon: "#e9967a",
+    darkviolet: "#9400d3",
+    fuchsia: "#ff00ff",
+    gold: "#ffd700",
+    indigo: "#4b0082",
+    khaki: "#f0e68c",
+    lightblue: "#add8e6",
+    lightgreen: "#90ee90",
+    lightgrey: "#d3d3d3",
+    lightpink: "#ffb6c1",
+    lime: "#00ff00",
+    magenta: "#ff00ff",
+    maroon: "#800000",
+    navy: "#000080",
+    olive: "#808000",
+    orange: "#ffa500",
+    pink: "#ffc0cb",
+    purple: "#800080",
+    violet: "#800080",
+    yellow: "#ffff00"
+};
+
+Colors.random = function() {
+    var result;
+    var count = 0;
+    for (var prop in this.names)
+        if (Math.random() < 1/++count)
+            result = prop;
+    return result;
+};
 //other variables
 var score;
 var gameOver = false;
@@ -15,6 +64,7 @@ var victory = false;
 var leave = false;
 var gameOn;
 var enemySnake;
+var enemyColor = Colors.random();
 var foodX, foodY, poisonX, poisonY;
 
 
@@ -31,10 +81,10 @@ gameField.onkeydown = function (e) {
     snake.setDirection(e.keyCode)
 }
 
-function Point(x, y) {
+function Point(x, y, color) {
 
     this.draw = function () {
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = color;
         ctx.fillRect(x * POINT_RADIUS, y * POINT_RADIUS, POINT_RADIUS, POINT_RADIUS)
     }
 
@@ -51,9 +101,11 @@ function Snake(x, y, length, direction) {
     this.snake = [];
     var directionSnake;
     var self = this;
+    let color = Colors.random();
 
     for (let i = 0; i < length; i++) {
-        self.snake.push(new Point(x + i, y));
+        self.snake.push(new Point(x + i, y, color));
+        self.snake[i].draw();
     }
     directionSnake = direction;
 
@@ -89,7 +141,7 @@ function Snake(x, y, length, direction) {
             window.gameOver = true;
         }
 
-        self.snake.push(new Point(x, y));
+        self.snake.push(new Point(x, y, color));
         self.paint();
 
         var packet = [];
@@ -214,7 +266,7 @@ function Poison() {
 function drawEnemy(exsnake) {
     if (exsnake) {
         for (var i = 0; i < exsnake.length; i++) {
-            ctx.fillStyle = 'black';
+            ctx.fillStyle = enemyColor;
             ctx.fillRect(exsnake[i].x * POINT_RADIUS, exsnake[i].y * POINT_RADIUS, POINT_RADIUS, POINT_RADIUS);
         }
     }
@@ -232,9 +284,14 @@ function startTimer(duration, display) {
         display.textContent = `Your time is running out ${minutes}:${seconds}`;
 
         if (--timer < 0) {
-            if (enemySnake.length > snake.getSize()) {
+            if (enemySnake.length-1 > snake.getSize()) {
+                console.log(enemySnake.length+' '+snake.getSize());
                 gameOver = true;
                 socket.emit('gameOver');
+            } else if (enemySnake.length-1 == snake.getSize()) {
+                clearInterval(gameOn);
+                ctx.font = 'bold 200px sans-serif';
+                ctx.strokeText("Draw", 320, gameField.height/2);
             }
             display.textContent = '';
             clearInterval(timerInterval);
@@ -248,7 +305,6 @@ function startTimer(duration, display) {
         }
     }, 1000);
 }
-
 
 var snake = new Snake(-1, -1, 1, 39);
 var food = new Food();

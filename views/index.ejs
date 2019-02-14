@@ -28,9 +28,14 @@
           .on('startGame', function (snakeX, snakeY) {
               snake = new Snake(snakeX, snakeY, START_SIZE, 39)
               gameField.focus();
-              gameOn=setInterval(game, 130);
-              let display = document.querySelector('#timer');
-              startTimer(20, display);
+              ctx.font = 'bold 50px sans-serif';
+              ctx.strokeText("You", snakeX*40+35, snakeY*40-10);
+              setTimeout(() => {
+                  gameOn=setInterval(game, 140);
+                  let display = document.querySelector('#timer');
+                  startTimer(20, display);
+              }, 3000)
+
           })
           .on('nextMove', function(coords) {
               enemySnake = coords;
