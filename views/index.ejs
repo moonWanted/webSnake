@@ -9,6 +9,7 @@
 
   <div id="content">
     <div id="timer"></div>
+      <div id="winsInARow"></div>
   <canvas id='gameField'  tabindex="0"></canvas>
     <div id="gameScore"></div>
   </div>
@@ -20,6 +21,7 @@
 
   <script>
 
+
       var socket = io().connect('',{
           'reconnection delay': 500
       });
@@ -28,6 +30,12 @@
           .on('startGame', function (snakeX, snakeY) {
               snake = new Snake(snakeX, snakeY, START_SIZE, 39)
               gameField.focus();
+              if(getCookie('winsInARow')) {
+                  wins = getCookie('winsInARow');
+                  document.querySelector('#winsInARow').textContent = wins+' consecutive wins';
+              } else {
+                  setCookie('winsInARow', 0, {expires: 2629743});
+              }
               ctx.font = 'bold 50px sans-serif';
               ctx.strokeText("You", snakeX*40+35, snakeY*40-10);
               setTimeout(() => {
@@ -46,6 +54,11 @@
               victory = true;
               ctx.font = 'bold 200px sans-serif';
               ctx.strokeText("You Win", 210, gameField.height/2);
+              if(wins) {
+                  deleteCookie('winsInARow');
+                  setCookie('winsInARow', Number(wins)+1, {expires: 2629743});
+                  document.querySelector('#winsInARow').textContent =Number(wins)+1+' consecutive wins';
+              }
           })
           .on('nextFood', function (x, y) {
               foodX = x;

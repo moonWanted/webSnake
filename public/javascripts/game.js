@@ -64,6 +64,7 @@ var victory = false;
 var leave = false;
 var gameOn;
 var enemySnake;
+var wins;
 var enemyColor = Colors.random();
 var foodX, foodY, poisonX, poisonY;
 
@@ -306,6 +307,46 @@ function startTimer(duration, display) {
     }, 1000);
 }
 
+function getCookie (name) {
+    let matches = document.cookie.match(new RegExp(
+        "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+}
+
+function setCookie(name, value, options) {
+    options = options || {};
+
+    var expires = options.expires;
+
+    if (typeof expires == "number" && expires) {
+        var d = new Date();
+        d.setTime(d.getTime() + expires * 1000);
+        expires = options.expires = d;
+    }
+    if (expires && expires.toUTCString) {
+        options.expires = expires.toUTCString();
+    }
+
+    value = encodeURIComponent(value);
+
+    var updatedCookie = name + "=" + value;
+
+    for (var propName in options) {
+        updatedCookie += "; " + propName;
+        var propValue = options[propName];
+        if (propValue !== true) {
+            updatedCookie += "=" + propValue;
+        }
+    }
+
+    document.cookie = updatedCookie;
+}
+
+function deleteCookie(name) {
+    setCookie(name, '', {expires: -1});
+}
+
 var snake = new Snake(-1, -1, 1, 39);
 var food = new Food();
 var poison = new Poison();
@@ -316,6 +357,8 @@ var game = function () {
     food.next();
     drawEnemy(enemySnake);
     if (gameOver) {
+        deleteCookie('winsInARow');
+        setCookie('winsInARow', 0, {expires: 2629743});
         ctx.font = 'bold 200px sans-serif';
         ctx.strokeText("Game Over", 30, gameField.height / 2);
         socket.emit('gameOver');
